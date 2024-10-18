@@ -5,10 +5,10 @@
 //  Created by Chris Mays on 8/20/24.
 //
 
-import Foundation
 import SafariServices
 @_spi(PrivateBetaConnect) @testable import StripeConnect
 @_spi(STP) import StripeCore
+@testable import StripeFinancialConnections
 @_spi(STP) import StripeUICore
 import WebKit
 import XCTest
@@ -183,6 +183,8 @@ class ConnectComponentWebViewControllerTests: XCTestCase {
         XCTAssertFalse(webVC.activityIndicator.isAnimating)
     }
 
+    // MARK: - didFailLoadWithError
+
     @MainActor
     func testJSOnLoadError() async throws {
         var error: Error?
@@ -230,6 +232,8 @@ class ConnectComponentWebViewControllerTests: XCTestCase {
         XCTAssertFalse(webVC.activityIndicator.isAnimating)
     }
 
+    // MARK: - openAuthenticatedWebView
+
     func testOpenAuthenticatedWebView() throws {
         let componentManager = componentManagerAssertingOnFetch()
         let authenticatedWebViewManager = MockAuthenticatedWebViewManager { url, _ in
@@ -253,6 +257,8 @@ class ConnectComponentWebViewControllerTests: XCTestCase {
 
         wait(for: [expectation], timeout: TestHelpers.defaultTimeout)
     }
+
+    // MARK: - openFinancialConnections
 
     func testOpenFinancialConnections_success() throws {
         let componentManager = componentManagerAssertingOnFetch()

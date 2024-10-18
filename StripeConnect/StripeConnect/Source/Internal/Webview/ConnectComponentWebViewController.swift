@@ -114,7 +114,7 @@ class ConnectComponentWebViewController: ConnectWebViewController {
                   didFailLoadWithError: didFailLoadWithError,
                   notificationCenter: notificationCenter,
                   webLocale: webLocale,
-                  authenticatedWebViewManager: authenticatedWebViewManager)
+                  authenticatedWebViewManager: authenticatedWebViewManager,
                   financialConnectionsPresenter: financialConnectionsPresenter)
     }
 
