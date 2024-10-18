@@ -29,6 +29,9 @@ class ConnectComponentWebViewController: ConnectWebViewController {
     /// Manages authenticated web views
     private let authenticatedWebViewManager: AuthenticatedWebViewManager
 
+    /// Presents the FinancialConnectionsSheet
+    private let financialConnectionsPresenter: FinancialConnectionsPresenter
+
     private let setterMessageHandler: OnSetterFunctionCalledMessageHandler = .init()
 
     private var didFailLoadWithError: (Error) -> Void
@@ -49,13 +52,15 @@ class ConnectComponentWebViewController: ConnectWebViewController {
         // Should only be overridden for tests
         notificationCenter: NotificationCenter = NotificationCenter.default,
         webLocale: Locale = Locale.autoupdatingCurrent,
-        authenticatedWebViewManager: AuthenticatedWebViewManager = .init()
+        authenticatedWebViewManager: AuthenticatedWebViewManager = .init(),
+        financialConnectionsPresenter: FinancialConnectionsPresenter = .init()
     ) {
         self.componentManager = componentManager
         self.notificationCenter = notificationCenter
         self.webLocale = webLocale
         self.authenticatedWebViewManager = authenticatedWebViewManager
         self.didFailLoadWithError = didFailLoadWithError
+        self.financialConnectionsPresenter = financialConnectionsPresenter
 
         let config = WKWebViewConfiguration()
 
@@ -100,7 +105,8 @@ class ConnectComponentWebViewController: ConnectWebViewController {
                      // Should only be overridden for tests
                      notificationCenter: NotificationCenter = NotificationCenter.default,
                      webLocale: Locale = Locale.autoupdatingCurrent,
-                     authenticatedWebViewManager: AuthenticatedWebViewManager = .init()) {
+                     authenticatedWebViewManager: AuthenticatedWebViewManager = .init(),
+                     financialConnectionsPresenter: FinancialConnectionsPresenter = .init()) {
         self.init(componentManager: componentManager,
                   componentType: componentType,
                   loadContent: loadContent,
@@ -109,6 +115,7 @@ class ConnectComponentWebViewController: ConnectWebViewController {
                   notificationCenter: notificationCenter,
                   webLocale: webLocale,
                   authenticatedWebViewManager: authenticatedWebViewManager)
+                  financialConnectionsPresenter: financialConnectionsPresenter)
     }
 
     required init?(coder: NSCoder) {
@@ -215,7 +222,7 @@ private extension ConnectComponentWebViewController {
         addMessageHandler(OpenAuthenticatedWebViewMessageHandler { [weak self] payload in
             self?.openAuthenticatedWebView(payload)
         })
-        addMessageHandler(OpenFinancialConnections(didReceiveMessage: { [weak self] payload in
+        addMessageHandler(OpenFinancialConnectionsMessageHandler(didReceiveMessage: { [weak self] payload in
             self?.openFinancialConnections(payload)
         }))
     }
@@ -259,12 +266,14 @@ private extension ConnectComponentWebViewController {
         }
     }
 
-    func openFinancialConnections(_ args: OpenFinancialConnections.Payload) {
-        let financialConnectionsSheet = FinancialConnectionsSheet(
-            financialConnectionsSessionClientSecret: args.clientSecret
-        )
-        financialConnectionsSheet.apiClient = componentManager.apiClient
-        financialConnectionsSheet.presentForToken(from: self) { [weak self] result in
+    func openFinancialConnections(_ args: OpenFinancialConnectionsMessageHandler.Payload) {
+        Task { @MainActor in
+            let result = await financialConnectionsPresenter.presentForToken(
+                apiClient: componentManager.apiClient,
+                clientSecret: args.clientSecret,
+                from: self
+            )
+
             var token: String?
             // TODO: MXMOBILE-2491 Log these as errors instead of printing to console
 
@@ -281,7 +290,7 @@ private extension ConnectComponentWebViewController {
                 break
             }
 
-            self?.sendMessage(ReturnedFromFinancialConnections(payload: .init(bankToken: token, id: args.id)))
+            sendMessage(ReturnedFromFinancialConnectionsSender(payload: .init(bankToken: token, id: args.id)))
         }
     }
 }
