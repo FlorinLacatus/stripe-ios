@@ -6,7 +6,7 @@
 //
 
 @_spi(STP) import StripeCore
-@_spi(STP) import StripeFinancialConnections
+import StripeFinancialConnections
 @_spi(STP) import StripeUICore
 import UIKit
 import WebKit
@@ -261,23 +261,19 @@ private extension ConnectComponentWebViewController {
 
     func openFinancialConnections(_ args: OpenFinancialConnections.Payload) {
         let financialConnectionsSheet = FinancialConnectionsSheet(
-            financialConnectionsSessionClientSecret: args.clientSecret,
-            returnURL: componentManager.returnUrl
+            financialConnectionsSessionClientSecret: args.clientSecret
         )
         financialConnectionsSheet.apiClient = componentManager.apiClient
-        financialConnectionsSheet.present(from: self) { [weak self] (result: HostControllerResult) in
+        financialConnectionsSheet.presentForToken(from: self) { [weak self] result in
             var token: String?
-
             // TODO: MXMOBILE-2491 Log these as errors instead of printing to console
 
             switch result {
-            case .completed(.financialConnections(let session)):
-                token = session.bankAccountToken?.id
-                if token == nil {
+            case .completed(result: (_, let returnedToken)):
+                token = returnedToken?.id
+                if returnedToken == nil {
                     debugPrint("Error using FinancialConnections: no bank token returned")
                 }
-            case .completed(.instantDebits):
-                debugPrint("Error using FinancialConnections: instantDebits not supported")
             case .failed(let error):
                 debugPrint("Error using FinancialConnections: \(error)")
             case .canceled:
