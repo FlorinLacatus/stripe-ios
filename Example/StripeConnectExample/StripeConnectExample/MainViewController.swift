@@ -63,10 +63,16 @@ class MainViewController: UITableViewController {
     }
 
     lazy var embeddedComponentManager: EmbeddedComponentManager = {
-        // NOTE: We are using a custom URL scheme in this example, but it is
-        // recommended to instead use an https URL registered to your domain
-        // as custom schemes are a potential attack vector. More documentation:
-        // https://developer.apple.com/documentation/xcode/defining-a-custom-url-scheme-for-your-app
+        /*
+         NOTE:
+         We are using a custom URL scheme in this example, but Stripe recommends
+         against doing this in production code to prevent malicious apps from
+         reusing the same URL scheme to intercept sensitive user data.
+
+         Instead, Stripe recommends using associated domains and adding the
+         return url to your websites `apple-app-site-association` file:
+         https://developer.apple.com/documentation/xcode/supporting-associated-domains
+         */
         return .init(returnUrl: "stripe-connect-example://stripe-connect-redirect",
                      appearance: AppSettings.shared.appearanceInfo.appearance,
                      fonts: customFonts(),
