@@ -8,8 +8,10 @@
 /// Indicates to open the FinancialConnections flow
 class OpenFinancialConnections: ScriptMessageHandler<OpenFinancialConnections.Payload> {
     struct Payload: Codable, Equatable {
+        /// The Financial Connections Session client secret used to open the FinancialConnectionsSheet
         let clientSecret: String
-        /// Unique identifier that is included in the `returnedFromFinancialConnections` message
+        /// Unique identifier (UUID) returned to the web view with the FinancialConnections
+        /// result in `returnedFromFinancialConnections` message
         let id: String
     }
     init(didReceiveMessage: @escaping (Payload) -> Void) {
