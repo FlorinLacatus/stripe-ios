@@ -75,6 +75,7 @@ class EmbeddedPaymentMethodsView: UIView {
         shouldShowMandate: Bool = true,
         savedPaymentMethods: [STPPaymentMethod] = [],
         customer: PaymentSheet.CustomerConfiguration? = nil,
+        incentive: PaymentMethodIncentive? = nil,
         delegate: EmbeddedPaymentMethodsViewDelegate? = nil
     ) {
         self.appearance = appearance
@@ -154,8 +155,9 @@ class EmbeddedPaymentMethodsView: UIView {
                 paymentMethodType: paymentMethodType,
                 subtitle: VerticalPaymentMethodListViewController.subtitleText(for: paymentMethodType),
                 hasSavedCard: savedPaymentMethods.hasSavedCard,
-                promoText: nil, // TODO(tillh-stripe) Pass promo text along
+                promoText: incentive?.takeIfAppliesTo(paymentMethodType)?.displayText,
                 appearance: rowButtonAppearance,
+                originalCornerRadius: appearance.cornerRadius,
                 shouldAnimateOnPress: true,
                 isEmbedded: true,
                 didTap: { [weak self] rowButton in

@@ -16,6 +16,7 @@ class PromoBadgeView: UIView {
     
     convenience init(
         appearance: PaymentSheet.Appearance,
+        cornerRadius: CGFloat? = nil,
         tinyMode: Bool,
         text: String? = nil
     ) {
@@ -30,7 +31,7 @@ class PromoBadgeView: UIView {
             ),
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
-            cornerRadius: appearance.cornerRadius,
+            cornerRadius: cornerRadius ?? appearance.cornerRadius,
             tinyMode: tinyMode,
             text: text
         )
